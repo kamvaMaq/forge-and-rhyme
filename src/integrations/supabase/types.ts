@@ -14,7 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      poems: {
+        Row: {
+          created_at: string
+          emailed_at: string | null
+          form: string
+          id: string
+          illustration_prompt: string | null
+          language: string
+          mood: string
+          poem_text: string
+          signature_image: string | null
+          social_caption: string | null
+          theme: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emailed_at?: string | null
+          form: string
+          id?: string
+          illustration_prompt?: string | null
+          language: string
+          mood: string
+          poem_text: string
+          signature_image?: string | null
+          social_caption?: string | null
+          theme: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emailed_at?: string | null
+          form?: string
+          id?: string
+          illustration_prompt?: string | null
+          language?: string
+          mood?: string
+          poem_text?: string
+          signature_image?: string | null
+          social_caption?: string | null
+          theme?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          last_poem_date: string | null
+          poems_generated_today: number
+          preferred_language: string
+          subscription_expires_at: string | null
+          subscription_status: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          last_poem_date?: string | null
+          poems_generated_today?: number
+          preferred_language?: string
+          subscription_expires_at?: string | null
+          subscription_status?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          last_poem_date?: string | null
+          poems_generated_today?: number
+          preferred_language?: string
+          subscription_expires_at?: string | null
+          subscription_status?: string
+        }
+        Relationships: []
+      }
+      voucher_redemptions: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          status: string
+          user_id: string
+          voucher_code: string
+          voucher_type: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          user_id: string
+          voucher_code: string
+          voucher_type: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          user_id?: string
+          voucher_code?: string
+          voucher_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
