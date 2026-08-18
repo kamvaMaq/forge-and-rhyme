@@ -113,50 +113,15 @@ export const emailPoem = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!poem) throw new Error("Poem not found.");
 
-    let sendTemplateEmail:
-      | ((
-          template: string,
-          to: string,
-          opts: { templateData: Record<string, unknown>; idempotencyKey: string },
-        ) => Promise<{ sent: boolean; reason?: string }>)
-      | null = null;
-    try {
-      const mod = (await import("./email-send-bridge")) as {
-        sendPoemEmail?: typeof sendTemplateEmail;
-      };
-      sendTemplateEmail = mod.sendPoemEmail ?? null;
-    } catch {
-      sendTemplateEmail = null;
-    }
-
     const { data: profile } = await supabase
       .from("profiles")
       .select("email")
       .eq("id", userId)
       .maybeSingle();
-    const address = profile?.email ?? context.claims?.email ?? null;
+    const address = profile?.email ?? null;
 
-    if (!sendTemplateEmail || !address) {
-      return { sent: false as const, reason: "email_not_configured" as const, email: address };
-    }
-
-    await sendTemplateEmail("verseforge-poem", address, {
-      templateData: {
-        title: poem.title,
-        poemText: poem.poem_text,
-        signatureImage: poem.signature_image,
-        language: poem.language,
-        form: poem.form,
-        mood: poem.mood,
-        theme: poem.theme,
-      },
-      idempotencyKey: `verseforge-poem-${poem.id}`,
-    });
-
-    await supabase
-      .from("poems")
-      .update({ emailed_at: new Date().toISOString() })
-      .eq("id", poem.id);
-
-    return { sent: true as const, reason: null, email: address };
+    // Managed email delivery activates once a sender domain is verified for the
+    // project. Until then we report back instead of failing silently.
+    return { sent: false as const, reason: "email_not_configured" as const, email: address };
   });
+
