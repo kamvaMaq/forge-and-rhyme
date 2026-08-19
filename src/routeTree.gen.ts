@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedGenerateRouteImport } from './routes/_authenticated/generate'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated/subscribe'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 
 const IndexRoute = IndexRouteImport.update({
@@ -34,6 +36,16 @@ const AuthenticatedGenerateRoute = AuthenticatedGenerateRouteImport.update({
   path: '/generate',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSubscribeRoute = AuthenticatedSubscribeRouteImport.update({
+  id: '/subscribe',
+  path: '/subscribe',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
@@ -44,12 +56,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/generate': typeof AuthenticatedGenerateRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/subscribe': typeof AuthenticatedSubscribeRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/generate': typeof AuthenticatedGenerateRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/subscribe': typeof AuthenticatedSubscribeRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
 }
 export interface FileRoutesById {
@@ -58,19 +74,24 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/generate': typeof AuthenticatedGenerateRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/generate' | '/workspace'
+  fullPaths:
+    '/' | '/auth' | '/generate' | '/profile' | '/subscribe' | '/workspace'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/generate' | '/workspace'
+  to: '/' | '/auth' | '/generate' | '/profile' | '/subscribe' | '/workspace'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/generate'
+    | '/_authenticated/profile'
+    | '/_authenticated/subscribe'
     | '/_authenticated/workspace'
   fileRoutesById: FileRoutesById
 }
@@ -110,6 +131,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGenerateRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/subscribe': {
+      id: '/_authenticated/subscribe'
+      path: '/subscribe'
+      fullPath: '/subscribe'
+      preLoaderRoute: typeof AuthenticatedSubscribeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workspace': {
       id: '/_authenticated/workspace'
       path: '/workspace'
@@ -122,11 +157,15 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedGenerateRoute: typeof AuthenticatedGenerateRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSubscribeRoute: typeof AuthenticatedSubscribeRoute
   AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGenerateRoute: AuthenticatedGenerateRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSubscribeRoute: AuthenticatedSubscribeRoute,
   AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
 }
 
