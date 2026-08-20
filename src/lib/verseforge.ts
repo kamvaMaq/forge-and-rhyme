@@ -54,3 +54,8 @@ export type PoemRecord = {
   emailed_at: string | null;
   created_at: string;
 };
+
+/** Today's date in South African time (UTC+2) as YYYY-MM-DD. */
+export function saToday(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Johannesburg" });
+}
