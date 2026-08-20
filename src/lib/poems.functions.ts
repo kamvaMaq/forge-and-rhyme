@@ -141,7 +141,7 @@ export const emailPoem = createServerFn({ method: "POST" })
       signatureImage: poem.signature_image ?? "",
     });
 
-    await supabase.from("poems").update({ emailed: true }).eq("id", poem.id);
+    await supabase.from("poems").update({ emailed_at: new Date().toISOString() }).eq("id", poem.id);
 
     return { sent: true as const, email: address };
   });
