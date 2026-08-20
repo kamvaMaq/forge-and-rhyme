@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Flame, Library, LogOut, Sparkles, Ticket, User } from "lucide-react";
+import { Flame, Library, LogOut, Moon, Sparkles, Sun, Ticket, User } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { isPremium, useProfile } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/hooks/useTheme";
 
 const NAV = [
   { to: "/generate", label: "Generate", icon: Sparkles },
@@ -19,6 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: profile } = useProfile();
   const navigate = useNavigate();
   const premium = isPremium(profile);
+  const { theme, toggleTheme } = useTheme();
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -59,6 +61,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             Words forged in every tongue
           </span>
           <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={toggleTheme}
+              className="size-9"
+            >
+              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </Button>
             {premium && (
               <Badge className="bg-gold text-gold-foreground">Premium</Badge>
             )}

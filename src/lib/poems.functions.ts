@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+export const DAILY_FREE_LIMIT = 5;
+
 const generateSchema = z.object({
   theme: z.string().trim().min(2).max(200),
   language: z.string().trim().min(2).max(40),
@@ -39,9 +41,10 @@ export const generatePoem = createServerFn({ method: "POST" })
 
     const usedToday = profile?.last_poem_date === today ? (profile?.poems_generated_today ?? 0) : 0;
 
-    if (!isPremium && usedToday >= 1) {
-      return { limitReached: true as const, poem: null };
+    if (!isPremium && usedToday >= DAILY_FREE_LIMIT) {
+      return { limitReached: true as const, poem: null, usedToday, isPremium };
     }
+
 
     const generated = await callPoetryEngine(data);
     const poemText = generated.poem_lines.join("\n");
@@ -69,7 +72,12 @@ export const generatePoem = createServerFn({ method: "POST" })
       .update({ poems_generated_today: usedToday + 1, last_poem_date: today })
       .eq("id", userId);
 
-    return { limitReached: false as const, poem: inserted };
+    return {
+      limitReached: false as const,
+      poem: inserted,
+      usedToday: usedToday + 1,
+      isPremium,
+    };
   });
 
 export const redeemVoucher = createServerFn({ method: "POST" })
@@ -119,9 +127,21 @@ export const emailPoem = createServerFn({ method: "POST" })
       .eq("id", userId)
       .maybeSingle();
     const address = profile?.email ?? null;
+    if (!address) throw new Error("Email failed — please try again");
 
-    // Managed email delivery activates once a sender domain is verified for the
-    // project. Until then we report back instead of failing silently.
-    return { sent: false as const, reason: "email_not_configured" as const, email: address };
+    const { sendPoemEmail } = await import("./verseforge.server");
+    await sendPoemEmail({
+      to: address,
+      poetTitle: poem.title,
+      poetLines: poem.poem_text.split("\n"),
+      language: poem.language,
+      form: poem.form,
+      mood: poem.mood,
+      theme: poem.theme,
+      signatureImage: poem.signature_image ?? "",
+    });
+
+    await supabase.from("poems").update({ emailed_at: new Date().toISOString() }).eq("id", poem.id);
+
+    return { sent: true as const, email: address };
   });
-

@@ -171,9 +171,16 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
   }
 
   html {
+    color-scheme: light;
+  }
+
+  html.dark {
     color-scheme: dark;
   }
 
@@ -183,6 +190,7 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+
 
   h1,
   h2,

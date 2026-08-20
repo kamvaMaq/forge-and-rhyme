@@ -26,8 +26,9 @@ import { Embers } from "@/components/Embers";
 import { PoemView } from "@/components/PoemView";
 import { PoemAudioPlayer } from "@/components/PoemAudioPlayer";
 import { FORMS, LANGUAGES, MOODS, type PoemRecord } from "@/lib/verseforge";
-import { emailPoem, generatePoem } from "@/lib/poems.functions";
+import { DAILY_FREE_LIMIT, emailPoem, generatePoem } from "@/lib/poems.functions";
 import { isPremium, useProfile } from "@/hooks/useAuth";
+import { saToday } from "@/lib/verseforge";
 
 export const Route = createFileRoute("/_authenticated/generate")({
   head: () => ({
@@ -62,10 +63,19 @@ function GeneratePage() {
   const [mood, setMood] = useState<string>("Hopeful");
   const [poem, setPoem] = useState<PoemRecord | null>(null);
   const [limitOpen, setLimitOpen] = useState(false);
+  const [usedOverride, setUsedOverride] = useState<number | null>(null);
+
+  const premium = isPremium(profile);
+  const usedFromProfile =
+    profile?.last_poem_date === saToday() ? (profile?.poems_generated_today ?? 0) : 0;
+  const used = Math.min(usedOverride ?? usedFromProfile, DAILY_FREE_LIMIT);
+  const limitReached = !premium && used >= DAILY_FREE_LIMIT;
+  const counterClass = used >= DAILY_FREE_LIMIT ? "text-destructive" : used >= 4 ? "text-gold" : "text-teal";
 
   const mutation = useMutation({
     mutationFn: async () => generate({ data: { theme, language, form, mood } }),
     onSuccess: (result) => {
+      setUsedOverride(result.usedToday);
       if (result.limitReached) {
         setLimitOpen(true);
         return;
@@ -81,14 +91,10 @@ function GeneratePage() {
   const emailMutation = useMutation({
     mutationFn: async (poemId: string) => sendEmail({ data: { poem_id: poemId } }),
     onSuccess: (result) => {
-      if (result.sent) {
-        toast.success(`📬 Poem sent to ${result.email}!`);
-        queryClient.invalidateQueries({ queryKey: ["poems"] });
-      } else {
-        toast.info("Email delivery isn't switched on yet — connect a sender domain to enable it.");
-      }
+      toast.success(`📬 Poem sent to ${result.email}!`);
+      queryClient.invalidateQueries({ queryKey: ["poems"] });
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: () => toast.error("Email failed — please try again"),
   });
 
   const share = async () => {
@@ -108,6 +114,10 @@ function GeneratePage() {
       toast.error("Give your poem a theme first.");
       return;
     }
+    if (limitReached) {
+      setLimitOpen(true);
+      return;
+    }
     mutation.mutate();
   };
 
@@ -116,9 +126,9 @@ function GeneratePage() {
       <header>
         <h1 className="font-display text-3xl text-foreground sm:text-4xl">Forge a poem</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {isPremium(profile)
+          {premium
             ? "Premium: unlimited poems, priority forging."
-            : "Free tier: one poem per day, resetting at midnight (SAST)."}
+            : `Free tier: ${DAILY_FREE_LIMIT} poems per day, resetting at midnight (SAST).`}
         </p>
       </header>
 
@@ -192,12 +202,21 @@ function GeneratePage() {
           <Button
             type="submit"
             size="lg"
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || limitReached}
             className={`min-h-12 ${mutation.isPending ? "animate-forge-pulse" : ""}`}
           >
             <Flame className="mr-2 size-4" />
             {mutation.isPending ? "Forging your poem…" : "Generate poem"}
           </Button>
+
+          <p
+            className={`text-center text-sm font-medium ${premium ? "text-gold" : counterClass}`}
+            aria-live="polite"
+          >
+            {premium
+              ? "✨ Unlimited — Premium Active"
+              : `✨ ${used} of ${DAILY_FREE_LIMIT} poems used today`}
+          </p>
         </div>
         <Embers active={mutation.isPending} />
       </form>
@@ -237,14 +256,15 @@ function GeneratePage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">
-              You've forged your poem for today 🔥
+              Daily limit reached 🔥
             </DialogTitle>
             <DialogDescription>
-              Come back tomorrow — or unlock unlimited poems for R50/month.
+              You've forged all {DAILY_FREE_LIMIT} poems for today. Come back tomorrow — or unlock
+              unlimited poems for R50/month.
             </DialogDescription>
           </DialogHeader>
           <Button asChild size="lg" className="min-h-12">
-            <Link to="/subscribe">Unlock unlimited poems</Link>
+            <Link to="/subscribe">Unlock Premium →</Link>
           </Button>
         </DialogContent>
       </Dialog>
