@@ -39,9 +39,10 @@ export const generatePoem = createServerFn({ method: "POST" })
 
     const usedToday = profile?.last_poem_date === today ? (profile?.poems_generated_today ?? 0) : 0;
 
-    if (!isPremium && usedToday >= 1) {
-      return { limitReached: true as const, poem: null };
+    if (!isPremium && usedToday >= DAILY_FREE_LIMIT) {
+      return { limitReached: true as const, poem: null, usedToday, isPremium };
     }
+
 
     const generated = await callPoetryEngine(data);
     const poemText = generated.poem_lines.join("\n");
