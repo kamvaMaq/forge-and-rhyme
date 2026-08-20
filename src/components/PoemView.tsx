@@ -8,7 +8,7 @@ export function PoemView({ poem }: { poem: PoemRecord }) {
     .filter((s) => s.length > 0);
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-6 sm:p-10">
+    <article className="glow-forge rounded-2xl border border-border bg-card p-6 sm:p-10">
       <header className="text-center">
         <h2 className="font-display text-3xl text-gradient-forge sm:text-4xl">{poem.title}</h2>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -37,9 +37,9 @@ export function PoemView({ poem }: { poem: PoemRecord }) {
             </div>
             {si < stanzas.length - 1 && (
               <div className="mx-auto mt-8 flex items-center justify-center gap-3">
-                <span className="h-px w-16 bg-border" />
+                <span className="h-px w-16 bg-gold/30" />
                 <span className="text-xs text-gold">✦</span>
-                <span className="h-px w-16 bg-border" />
+                <span className="h-px w-16 bg-gold/30" />
               </div>
             )}
           </div>
